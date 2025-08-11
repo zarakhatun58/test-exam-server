@@ -12,7 +12,7 @@ dotenv.config();
 const app = express();
 // app.use(cors());
 app.use(cors({
-  origin: 'https://test-exam-client.onrender.com', 
+  origin: 'https://test-exam-client.onrender.com',
   credentials: true
 }));
 app.use(express.json());
@@ -20,4 +20,8 @@ app.use(express.json());
 app.use('/api/auth', authRoutes);
 app.use('/api/assessment', assessmentRoutes);
 app.use('/api/admin', adminQuestionRoutes);
+
+app.get("/", (req, res) => {
+  res.send("✅ School assesment server running ");
+});
 export default app;
