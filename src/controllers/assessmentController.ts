@@ -5,6 +5,7 @@ import Question from '../models/Question';
 import AssessmentSession from '../models/AssessmentSession';
 import AssessmentResult from '../models/AssessmentResult';
 import SchoolUser from '../models/SchoolUser';
+import { AuthRequest } from '../middlewares/authMiddleware';
 
 // Helper: levels by step
 const LEVELS_BY_STEP: Record<number, string[]> = {
@@ -311,3 +312,67 @@ export async function canTakeAssessment(req: Request, res: Response) {
         return res.status(500).json({ success: false, message: 'Server error' });
     }
 }
+
+// Admin: get all assessment results
+export const getAllAssessmentResults = async (req: Request, res: Response) => {
+  try {
+    const { page = 1, limit = 10, sortBy = 'createdAt', sortOrder = 'desc', search, step, level } = req.query;
+
+    const query: any = {};
+
+    if (search) {
+      query.$or = [
+        { certification: { $regex: search, $options: 'i' } },
+      ];
+    }
+
+    if (step) {
+      query.step = Number(step);
+    }
+
+    if (level) {
+      query.levelAchieved = level;
+    }
+
+    const skip = (Number(page) - 1) * Number(limit);
+
+    const [results, total] = await Promise.all([
+      AssessmentResult.find(query)
+        .populate('userId', 'name email')
+        .populate('sessionId')
+        .sort({ [String(sortBy)]: sortOrder === 'asc' ? 1 : -1 })
+        .skip(skip)
+        .limit(Number(limit)),
+      AssessmentResult.countDocuments(query),
+    ]);
+
+    res.json({
+      success: true,
+      data: {
+        items: results,
+        total,
+        page: Number(page),
+        limit: Number(limit),
+      },
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, message: 'Failed to fetch results', error });
+  }
+};
+
+// User: get own results
+export const getMyAssessmentResults = async (req: AuthRequest, res: Response) => {
+  try {
+    if (!req.user?.id) {
+      return res.status(401).json({ success: false, message: 'Unauthorized' });
+    }
+
+    const results = await AssessmentResult.find({ userId: req.user.id })
+      .populate('sessionId')
+      .sort({ createdAt: -1 });
+
+    res.json({ success: true, data: results });
+  } catch (error) {
+    res.status(500).json({ success: false, message: 'Failed to fetch your results', error });
+  }
+};

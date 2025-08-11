@@ -7,6 +7,7 @@ import mongoose from 'mongoose';
 import authRoutes from './routes/authRoutes';
 import assessmentRoutes from './routes/assessmentRoutes';
 import adminQuestionRoutes from './routes/adminQuestionRoutes';
+import adminAssessmentRoutes from './routes/adminAssessmentRoutes';
 
 dotenv.config();
 
@@ -30,7 +31,7 @@ app.get('/', (req, res) => {
 app.use('/api/auth', authRoutes);
 app.use('/api/assessment', assessmentRoutes);
 app.use('/api/admin', adminQuestionRoutes);
-
+app.use('/api/admin/all', adminAssessmentRoutes);
 // MongoDB connection + server start
 const PORT = process.env.PORT || 4000;
 const MONGO_URI = process.env.MONGO_URI || '';

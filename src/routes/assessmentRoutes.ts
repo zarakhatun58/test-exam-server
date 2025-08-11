@@ -7,8 +7,10 @@ import {
   submitAnswer,
   submitAssessment,
   canTakeAssessment,
+  getAllAssessmentResults,
+  getMyAssessmentResults,
 } from '../controllers/assessmentController';
-import { verifyToken } from '../middlewares/authMiddleware'; // your JWT middleware
+import { verifyAdmin, verifyToken } from '../middlewares/authMiddleware'; // your JWT middleware
 
 const router = express.Router();
 
@@ -21,5 +23,10 @@ router.post('/start', verifyToken, startAssessment);
 router.post('/answer', verifyToken, submitAnswer);
 router.post('/submit', verifyToken, submitAssessment);
 router.get('/can-take', verifyToken, canTakeAssessment);
+// Admin dashboard – all assessments
+router.get('/all', verifyToken, verifyAdmin, getAllAssessmentResults);
+
+// User dashboard – their own history
+router.get('/my', verifyToken, getMyAssessmentResults);
 
 export default router;
