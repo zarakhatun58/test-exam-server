@@ -17,11 +17,13 @@ app.use(cors({
 }));
 app.use(express.json());
 
+app.get("/", (req, res) => {
+  res.send("✅ School assesment server running ");
+});
+
 app.use('/api/auth', authRoutes);
 app.use('/api/assessment', assessmentRoutes);
 app.use('/api/admin', adminQuestionRoutes);
 
-app.get("/", (req, res) => {
-  res.send("✅ School assesment server running ");
-});
+
 export default app;
